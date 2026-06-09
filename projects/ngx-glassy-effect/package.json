@@ -1,0 +1,33 @@
+{
+  "name": "ngx-glassy-effect",
+  "version": "0.0.23",
+  "author": {
+    "name": "anassmdi",
+    "url": "https://github.com/anassmdi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anassmdi/ngx-glassy-effect"
+  },
+  "bugs": {
+    "url": "https://github.com/anassmdi/ngx-glassy-effect/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "ngx",
+    "glassy",
+    "liquid-glass",
+    "ngx-glassy-effect",
+    "glass-effect",
+    "glassy-effect"
+  ],
+  "peerDependencies": {
+    "@angular/common": ">=18.0.0",
+    "@angular/core": ">=18.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
