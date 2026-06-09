@@ -6,6 +6,11 @@ import { isPlatformBrowser } from '@angular/common';
   standalone: true
 })
 export class GlassyEffect {
+
+  /**
+   * This class has been generator with the help of AI.
+   **/
+
   private el = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
@@ -13,8 +18,9 @@ export class GlassyEffect {
 
   bezel = input<number>(10);
   scale = input<number>(50);
-  blur = input<number>(1);
+  blur = input<number>(1.5);
   profile = input<'circle' | 'squircle'>('squircle');
+  showBorder = input<boolean>(false);
 
   private width = signal<number>(0);
   private height = signal<number>(0);
@@ -41,12 +47,24 @@ export class GlassyEffect {
 
       if (w === 0 || h === 0) return;
 
-      const dataUrl = this.generateDisplacementMap(w, h, bezel, profile);
+      const nativeEl = this.el.nativeElement;
+      const computedStyle = window.getComputedStyle(nativeEl);
+
+      const maxPossibleRadius = Math.min(w / 2, h / 2);
+      const rawRadius = parseFloat(computedStyle.borderRadius) || 0;
+      const borderRadius = Math.min(rawRadius, maxPossibleRadius);
+
+      const dataUrl = this.generateDisplacementMap(w, h, bezel, profile, borderRadius);
       this.syncSvgFilter(dataUrl, w, h, scale, blur);
 
-      const nativeEl = this.el.nativeElement;
       nativeEl.style.backdropFilter = `url(#${this.filterId})`;
-      this.applyAppleGlassLighting();
+
+      if (this.showBorder()) {
+        this.applyBorderLighting();
+      } else if (this.borderLayer) {
+        this.borderLayer.remove();
+        this.borderLayer = null;
+      }
     });
 
     this.destroyRef.onDestroy(() => {
@@ -58,10 +76,9 @@ export class GlassyEffect {
     });
   }
 
-  private applyAppleGlassLighting(): void {
+  private applyBorderLighting(): void {
     const nativeEl = this.el.nativeElement;
 
-    // Ensure containment context for the absolute border layer
     const computedStyle = window.getComputedStyle(nativeEl);
     if (computedStyle.position === 'static') {
       nativeEl.style.position = 'relative';
@@ -118,7 +135,8 @@ export class GlassyEffect {
     w: number,
     h: number,
     bezel: number,
-    profile: 'circle' | 'squircle'
+    profile: 'circle' | 'squircle',
+    borderRadius: number
   ): string {
     const canvas = this.sharedCanvas;
     if (!canvas) return '';
@@ -142,58 +160,53 @@ export class GlassyEffect {
         let nx = 0;
         let ny = 0;
 
-        if (minDist < bezel) {
-          if (minDist === distL) nx = 1;
-          else if (minDist === distR) nx = -1;
-          else if (minDist === distT) ny = 1;
-          else if (minDist === distB) ny = -1;
+        if (minDist === distL) nx = 1;
+        else if (minDist === distR) nx = -1;
+        else if (minDist === distT) ny = 1;
+        else if (minDist === distB) ny = -1;
 
-          if (x < bezel && y < bezel) {
-            const dist = Math.sqrt(Math.pow(bezel - x, 2) + Math.pow(bezel - y, 2));
-            minDist = bezel - dist;
-            if (dist > 0) {
-              nx = (bezel - x) / dist;
-              ny = (bezel - y) / dist;
-            }
-          } else if (x > w - bezel && y < bezel) {
-            const dist = Math.sqrt(Math.pow(x - (w - bezel), 2) + Math.pow(bezel - y, 2));
-            minDist = bezel - dist;
-            if (dist > 0) {
-              nx = -(x - (w - bezel)) / dist;
-              ny = (bezel - y) / dist;
-            }
-          } else if (x < bezel && y > h - bezel) {
-            const dist = Math.sqrt(Math.pow(bezel - x, 2) + Math.pow(y - (h - bezel), 2));
-            minDist = bezel - dist;
-            if (dist > 0) {
-              nx = (bezel - x) / dist;
-              ny = -(y - (h - bezel)) / dist;
-            }
-          } else if (x > w - bezel && y > h - bezel) {
-            const dist = Math.sqrt(Math.pow(x - (w - bezel), 2) + Math.pow(y - (h - bezel), 2));
-            minDist = bezel - dist;
-            if (dist > 0) {
-              nx = -(x - (w - bezel)) / dist;
-              ny = -(y - (h - bezel)) / dist;
-            }
+        if (x < borderRadius && y < borderRadius) {
+          const dist = Math.sqrt(Math.pow(borderRadius - x, 2) + Math.pow(borderRadius - y, 2));
+          minDist = borderRadius - dist;
+          if (dist > 0) {
+            nx = (borderRadius - x) / dist;
+            ny = (borderRadius - y) / dist;
+          }
+        } else if (x > w - borderRadius && y < borderRadius) {
+          const dist = Math.sqrt(Math.pow(x - (w - borderRadius), 2) + Math.pow(borderRadius - y, 2));
+          minDist = borderRadius - dist;
+          if (dist > 0) {
+            nx = -(x - (w - borderRadius)) / dist;
+            ny = (borderRadius - y) / dist;
+          }
+        } else if (x < borderRadius && y > h - borderRadius) {
+          const dist = Math.sqrt(Math.pow(borderRadius - x, 2) + Math.pow(y - (h - borderRadius), 2));
+          minDist = borderRadius - dist;
+          if (dist > 0) {
+            nx = (borderRadius - x) / dist;
+            ny = -(y - (h - borderRadius)) / dist;
+          }
+        } else if (x > w - borderRadius && y > h - borderRadius) {
+          const dist = Math.sqrt(Math.pow(x - (w - borderRadius), 2) + Math.pow(y - (h - borderRadius), 2));
+          minDist = borderRadius - dist;
+          if (dist > 0) {
+            nx = -(x - (w - borderRadius)) / dist;
+            ny = -(y - (h - borderRadius)) / dist;
           }
         }
 
-        let t = Math.max(0, Math.min(1, minDist / bezel));
-        if (minDist < 0) t = 0;
+        let magnitudeClamp = 0;
 
-        let slope = 0;
-        const om_t = 1 - t;
+        if (minDist > 0 && minDist < bezel) {
+          const t = minDist / bezel;
+          const factor = 1 - t;
 
-        if (profile === 'circle') {
-          const heightVal = Math.sqrt(1 - om_t * om_t);
-          slope = heightVal > 0 ? om_t / heightVal : 0;
-        } else {
-          const heightVal = Math.pow(1 - Math.pow(om_t, 4), 0.25);
-          slope = heightVal > 0 ? Math.pow(om_t, 3) / Math.pow(heightVal, 3) : 0;
+          if (profile === 'circle') {
+            magnitudeClamp = Math.sin(factor * Math.PI / 2) * 0.45;
+          } else {
+            magnitudeClamp = Math.pow(Math.sin(factor * Math.PI / 2), 2) * 0.45;
+          }
         }
-
-        const magnitudeClamp = Math.min(1, slope * 0.45);
 
         const rVal = Math.floor(128 + nx * magnitudeClamp * 127);
         const gVal = Math.floor(128 + ny * magnitudeClamp * 127);
