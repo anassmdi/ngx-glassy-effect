@@ -92,6 +92,67 @@
           "builder": "@angular/build:unit-test"
         }
       }
+    },
+    "glassy-effect-test": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/glassy-effect-test",
+      "sourceRoot": "projects/glassy-effect-test/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/glassy-effect-test/src/main.ts",
+            "tsConfig": "projects/glassy-effect-test/tsconfig.app.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/glassy-effect-test/public"
+              }
+            ],
+            "styles": ["projects/glassy-effect-test/src/styles.css"]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "glassy-effect-test:build:production"
+            },
+            "development": {
+              "buildTarget": "glassy-effect-test:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
     }
   }
 }
