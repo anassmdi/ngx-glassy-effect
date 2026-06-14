@@ -8,7 +8,7 @@ import { isPlatformBrowser } from '@angular/common';
 export class GlassyEffect {
 
   /**
-   * This class has been generator with the help of AI.
+   * This class has been generated with the help of AI.
    **/
 
   private el = inject(ElementRef<HTMLElement>);
