@@ -27,7 +27,7 @@ export class App {
 }
 ```
 
-```angular20html
+```html
 <!-- Use in your html element as a directive, & configure it as your wish -->
 <div class="content"
      ngxGlassyEffect
