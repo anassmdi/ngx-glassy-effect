@@ -132,6 +132,9 @@ body {
   z-index: 10;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  align-content: center;
+  line-height: 70px;
   height: auto;
   color: white;
   width: fit-content;
