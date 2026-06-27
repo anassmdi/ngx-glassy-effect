@@ -35,12 +35,14 @@ export class App {
      [scale]="50"
      [bezel]="10"
      [profile]="'squircle'"
-     [showBorder]="true">
+     [showBorder]="true"
+     [lensRange]="100"
+     [reflectionMidpoint]="0.2">
   Hello - Bonjour - مرحبا
 </div>
 ```
 
-> Tip 1 **: If your div (.content for exmp) text is white & the background behind the div is light, give your div a semi-transparent background, like rgba(0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
+> Tip 1 **: If your div (.content for example) text is white & the background behind the div is light, give your div a semi-transparent background, like rgba(0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
 
 ```css
 /* Tip 1 */
@@ -63,45 +65,24 @@ export class App {
 
 ## Demo
 
-- Using default values, & showing no border :
 
-![Default](/about/default-no-border.gif)
+![Default](/about/preview.gif)
 
-- Using default values, with borders :
-
-![Default](/about/default-border.gif)
-
-- With bezel as 30 (default is 10) :
-
-![Default](/about/bezel-30.gif)
-
-- With scale as 100 (default is 50) :
-
-![Default](/about/scale-100.gif)
-
-- With blur as 5 (default is 1.5) :
-
-![Default](/about/blur-5.gif)
-
-- With profile as 'circle' (default is 'squircle') :
-
-![Default](/about/profile-circle.gif)
-
-> The source code of the Gifs is in '/projects/glassy-effect-test'
+> The source code of the demo is in '/projects/glassy-effect-test'
 
 ## Configuration
 
 - If you wish to customize the inputs values, here's a full description of all the variables :
 
-| Input      | Type                  | Default   | Description                                                                                                  |
-|------------|-----------------------|-----------|--------------------------------------------------------------------------------------------------------------|
-| bezel      | number                | 10        | The width of the refractive edge bevel in pixels.                                                            |
-| scale      | number                | 50        | The intensity of the glass refraction distortion map.                                                        |
-| blur       | number                | 1.5       | The backdrop blur intensity factor applied to the substrate.                                                 |
-| profile    | 'circle' / 'squircle' | 'squircle | The geometric falloff curve used to generate the edge normals.                                               |
-| showBorder | boolean               | false     | When true, renders an integrated semi-transparent pseudo-border with a realistic top-down lighting gradient. |
-
-> Read Tip 1 ** if your ngxGlassyEffect div's text is not showing.
+| Input              | Type                  | Default   | Description                                                                                         |
+|--------------------|-----------------------|-----------|-----------------------------------------------------------------------------------------------------|
+| bezel              | number                | 10        | The width of the refractive edge bevel in pixels.                                                   |
+| scale              | number                | 50        | The intensity of the glass refraction distortion map.                                               |
+| blur               | number                | 1.5       | The backdrop blur intensity factor applied to the substrate.                                        |
+| profile            | 'circle' / 'squircle' | 'squircle | The geometric falloff curve used to generate the edge normals.                                      |
+| showBorder         | boolean               | false     | Dynamically injects an anti-aliased pseudo-border running a dynamic light-angle alignment gradient. |
+| lensRange          | number                | 100       | The spatial scope/influence bounding box of the border lens effect.                                 |
+| reflectionMidpoint | number                | 0.2       | The turning midpoint ratio where edge glare achieves peak reflection values.                        |
 
 ## Contribute
 

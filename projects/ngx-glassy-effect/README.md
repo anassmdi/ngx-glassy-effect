@@ -24,7 +24,7 @@ export class App {
 }
 ```
 
-```angular20html
+```html
 <!-- Use in your html element as a directive, & configure it as your wish -->
 <div class="content"
      ngxGlassyEffect
@@ -32,12 +32,14 @@ export class App {
      [scale]="50"
      [bezel]="10"
      [profile]="'squircle'"
-     [showBorder]="true">
+     [showBorder]="true"
+     [lensRange]="100"
+     [reflectionMidpoint]="0.2">
   Hello - Bonjour - مرحبا
 </div>
 ```
 
-> Tip 1 **: If your div (.content for exmp) text is white & the background behind the div is light, give your div a semi-transparent background, like rgba(0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
+> Tip 1 **: If your div (.content for example) text is white & the background behind the div is light, give your div a semi-transparent background, like rgba(0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
 
 ```css
 /* Tip 1 */
@@ -66,12 +68,12 @@ export class App {
 
 - If you wish to customize the inputs values, here's a full description of all the variables :
 
-| Input      | Type                  | Default   | Description                                                                                                  |
-|------------|-----------------------|-----------|--------------------------------------------------------------------------------------------------------------|
-| bezel      | number                | 10        | The width of the refractive edge bevel in pixels.                                                            |
-| scale      | number                | 50        | The intensity of the glass refraction distortion map.                                                        |
-| blur       | number                | 1.5       | The backdrop blur intensity factor applied to the substrate.                                                 |
-| profile    | 'circle' / 'squircle' | 'squircle | The geometric falloff curve used to generate the edge normals.                                               |
-| showBorder | boolean               | false     | When true, renders an integrated semi-transparent pseudo-border with a realistic top-down lighting gradient. |
-
-> Read Tip 1 ** if your ngxGlassyEffect div's text is not showing.
+| Input              | Type                  | Default   | Description                                                                                         |
+|--------------------|-----------------------|-----------|-----------------------------------------------------------------------------------------------------|
+| bezel              | number                | 10        | The width of the refractive edge bevel in pixels.                                                   |
+| scale              | number                | 50        | The intensity of the glass refraction distortion map.                                               |
+| blur               | number                | 1.5       | The backdrop blur intensity factor applied to the substrate.                                        |
+| profile            | 'circle' / 'squircle' | 'squircle | The geometric falloff curve used to generate the edge normals.                                      |
+| showBorder         | boolean               | false     | Dynamically injects an anti-aliased pseudo-border running a dynamic light-angle alignment gradient. |
+| lensRange          | number                | 100       | The spatial scope/influence bounding box of the border lens effect.                                 |
+| reflectionMidpoint | number                | 0.2       | The turning midpoint ratio where edge glare achieves peak reflection values.                        |
