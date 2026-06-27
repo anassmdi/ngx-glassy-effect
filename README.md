@@ -65,11 +65,11 @@ export class App {
 
 ## Demo
 
-First demo that shows how it reflects so well with any border-radius & any size of the box you're applying it to.
+#### First demo that shows how it reflects so well with any border-radius & any size of the box you're applying it to.
 
 ![Default](/about/preview.gif)
 
-Another demo with a real-life example, it shows how close the reflection gets to the real apple's ios liquid glass.
+#### Another demo with a real-life example, it shows how close the reflection gets to the real apple's ios liquid glass.
 
 ![Default](/about/preview2.gif)
 
