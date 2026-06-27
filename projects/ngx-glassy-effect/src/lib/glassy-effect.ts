@@ -6,11 +6,6 @@ import { isPlatformBrowser } from '@angular/common';
   standalone: true
 })
 export class GlassyEffect {
-
-  /**
-   * This class has been generated with the help of AI.
-   **/
-
   private el = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
   private platformId = inject(PLATFORM_ID);
@@ -21,6 +16,9 @@ export class GlassyEffect {
   blur = input<number>(1.5);
   profile = input<'circle' | 'squircle'>('squircle');
   showBorder = input<boolean>(false);
+
+  lensRange = input<number>(100);
+  reflectionMidpoint = input<number>(0.2);
 
   private width = signal<number>(0);
   private height = signal<number>(0);
@@ -40,10 +38,11 @@ export class GlassyEffect {
     effect(() => {
       const w = Math.floor(this.width());
       const h = Math.floor(this.height());
-      const bezel = this.bezel();
       const scale = this.scale();
       const blur = this.blur();
       const profile = this.profile();
+      const lensRange = this.lensRange();
+      const reflectionMidpoint = this.reflectionMidpoint();
 
       if (w === 0 || h === 0) return;
 
@@ -54,13 +53,13 @@ export class GlassyEffect {
       const rawRadius = parseFloat(computedStyle.borderRadius) || 0;
       const borderRadius = Math.min(rawRadius, maxPossibleRadius);
 
-      const dataUrl = this.generateDisplacementMap(w, h, bezel, profile, borderRadius);
+      const dataUrl = this.generateDisplacementMap(w, h, profile, borderRadius, lensRange, reflectionMidpoint);
       this.syncSvgFilter(dataUrl, w, h, scale, blur);
 
       nativeEl.style.backdropFilter = `url(#${this.filterId})`;
 
       if (this.showBorder()) {
-        this.applyBorderLighting();
+        this.applyBorderLighting(w, h, borderRadius);
       } else if (this.borderLayer) {
         this.borderLayer.remove();
         this.borderLayer = null;
@@ -76,19 +75,16 @@ export class GlassyEffect {
     });
   }
 
-  private applyBorderLighting(): void {
+  private applyBorderLighting(w: number, h: number, r: number): void {
     const nativeEl = this.el.nativeElement;
-
     const computedStyle = window.getComputedStyle(nativeEl);
+
     if (computedStyle.position === 'static') {
       nativeEl.style.position = 'relative';
     }
 
     nativeEl.style.border = 'none';
-    nativeEl.style.boxShadow = `
-      0 4px 20px -2px rgba(0, 0, 0, 0.4),
-      0 1px 3px 0 rgba(0, 0, 0, 0.2)
-    `;
+    nativeEl.style.boxShadow = 'none';
 
     if (!this.borderLayer) {
       this.borderLayer = document.createElement('div');
@@ -96,7 +92,8 @@ export class GlassyEffect {
       this.borderLayer.style.inset = '0px';
       this.borderLayer.style.pointerEvents = 'none';
       this.borderLayer.style.zIndex = '1';
-      this.borderLayer.style.webkitMask = 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)';
+      this.borderLayer.style.webkitMask =
+        'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)';
       this.borderLayer.style.webkitMaskComposite = 'xor';
       this.borderLayer.style.maskComposite = 'exclude';
       this.borderLayer.style.padding = '1px';
@@ -104,16 +101,22 @@ export class GlassyEffect {
     }
 
     this.borderLayer.style.borderRadius = computedStyle.borderRadius || 'inherit';
-    this.borderLayer.style.opacity = '0.85';
+    this.borderLayer.style.opacity = '1';
+
+    const dx = w - 2 * r + r * Math.sqrt(2);
+    const dy = h - 2 * r + r * Math.sqrt(2);
+    const angle = 90 + (Math.atan2(dx, dy) * 180) / Math.PI;
+
     this.borderLayer.style.background = `
-      linear-gradient(135deg,
-        rgba(255, 255, 255, 0.45) 0%,
-        rgba(255, 255, 255, 0.05) 45%,
-        rgba(0, 0, 0, 0) 60%
-      ),
-      linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(0, 0, 0, 0.35) 100%
+      linear-gradient(${angle}deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.18) 20%,
+        rgba(255, 255, 255, 0.12) 35%,
+        rgba(255, 255, 255, 0.07) 45%,
+        rgba(255, 255, 255, 0.07) 55%,
+        rgba(255, 255, 255, 0.12) 65%,
+        rgba(255, 255, 255, 0.18) 80%,
+        rgba(255, 255, 255, 0.22) 100%
       )
     `;
   }
@@ -134,9 +137,10 @@ export class GlassyEffect {
   private generateDisplacementMap(
     w: number,
     h: number,
-    bezel: number,
     profile: 'circle' | 'squircle',
-    borderRadius: number
+    borderRadius: number,
+    lensRange: number,
+    reflectionMidpoint: number
   ): string {
     const canvas = this.sharedCanvas;
     if (!canvas) return '';
@@ -148,6 +152,8 @@ export class GlassyEffect {
 
     const imgData = ctx.createImageData(w, h);
     const data = imgData.data;
+
+    const activeRange = lensRange * reflectionMidpoint;
 
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
@@ -173,21 +179,27 @@ export class GlassyEffect {
             ny = (borderRadius - y) / dist;
           }
         } else if (x > w - borderRadius && y < borderRadius) {
-          const dist = Math.sqrt(Math.pow(x - (w - borderRadius), 2) + Math.pow(borderRadius - y, 2));
+          const dist = Math.sqrt(
+            Math.pow(x - (w - borderRadius), 2) + Math.pow(borderRadius - y, 2),
+          );
           minDist = borderRadius - dist;
           if (dist > 0) {
             nx = -(x - (w - borderRadius)) / dist;
             ny = (borderRadius - y) / dist;
           }
         } else if (x < borderRadius && y > h - borderRadius) {
-          const dist = Math.sqrt(Math.pow(borderRadius - x, 2) + Math.pow(y - (h - borderRadius), 2));
+          const dist = Math.sqrt(
+            Math.pow(borderRadius - x, 2) + Math.pow(y - (h - borderRadius), 2),
+          );
           minDist = borderRadius - dist;
           if (dist > 0) {
             nx = (borderRadius - x) / dist;
             ny = -(y - (h - borderRadius)) / dist;
           }
         } else if (x > w - borderRadius && y > h - borderRadius) {
-          const dist = Math.sqrt(Math.pow(x - (w - borderRadius), 2) + Math.pow(y - (h - borderRadius), 2));
+          const dist = Math.sqrt(
+            Math.pow(x - (w - borderRadius), 2) + Math.pow(y - (h - borderRadius), 2),
+          );
           minDist = borderRadius - dist;
           if (dist > 0) {
             nx = -(x - (w - borderRadius)) / dist;
@@ -195,25 +207,29 @@ export class GlassyEffect {
           }
         }
 
-        let magnitudeClamp = 0;
+        let magnitude = 0;
 
-        if (minDist > 0 && minDist < bezel) {
-          const t = minDist / bezel;
-          const factor = 1 - t;
-
-          if (profile === 'circle') {
-            magnitudeClamp = Math.sin(factor * Math.PI / 2) * 0.45;
-          } else {
-            magnitudeClamp = Math.pow(Math.sin(factor * Math.PI / 2), 2) * 0.45;
-          }
+        if (minDist >= 0 && minDist < activeRange) {
+          const tActive = minDist / activeRange;
+          magnitude = Math.pow(1 - tActive, 2);
+        } else {
+          magnitude = 0;
         }
 
-        const rVal = Math.floor(128 + nx * magnitudeClamp * 127);
-        const gVal = Math.floor(128 + ny * magnitudeClamp * 127);
+        let finalMagX = nx * magnitude;
+        let finalMagY = ny * magnitude;
+
+        if (profile === 'squircle') {
+          finalMagX *= 0.95;
+          finalMagY *= 0.95;
+        }
+
+        const rVal = Math.floor(128 + finalMagX * 127);
+        const gVal = Math.floor(128 + finalMagY * 127);
 
         const idx = (y * w + x) * 4;
-        data[idx] = rVal;
-        data[idx + 1] = gVal;
+        data[idx] = Math.max(0, Math.min(255, rVal));
+        data[idx + 1] = Math.max(0, Math.min(255, gVal));
         data[idx + 2] = 128;
         data[idx + 3] = 255;
       }
@@ -229,13 +245,16 @@ export class GlassyEffect {
     if (!container) {
       container = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       container.id = `svg-container-${this.filterId}`;
-      container.setAttribute('style', 'position: absolute; width: 0; height: 0; pointer-events: none;');
+      container.setAttribute(
+        'style',
+        'position: absolute; width: 0; height: 0; pointer-events: none;',
+      );
       document.body.appendChild(container);
     }
 
     container.innerHTML = `
       <filter id="${this.filterId}"
-              x="-10%" y="-10%" width="120%" height="120%"
+              x="-30%" y="-30%" width="160%" height="160%"
               primitiveUnits="userSpaceOnUse"
               color-interpolation-filters="sRGB">
 
