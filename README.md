@@ -53,7 +53,7 @@ export class App {
 }
 ```
 
-> Tip 2 : If the default borders & shadows aren't working for you, you can just remove [showBorder] or make it 'false', & give the element of ngxGlassyEffect the border & shadows you like using css.
+> Tip 2 : If the default borders aren't working for you, you can just remove [showBorder] or make it 'false', & give the element of ngxGlassyEffect the border you like using css.
 
 ```css
 /* Tip 2 */
