@@ -75,6 +75,8 @@ export class App {
 
 ![Default](/about/preview2.gif)
 
+> Note : in this example, the 'lensRange' has been set to 60, since the container has smaller width/height
+
 ## Configuration
 
 - If you wish to customize the inputs values, here's a full description of all the variables :
