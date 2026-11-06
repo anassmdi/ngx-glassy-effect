@@ -2,6 +2,9 @@
 
 This project is an Angular directive that applies a glassy effect to your html elements.
 
+- V3 : 3rd time's the charm, the V2 was not bad, but it only worked on Chrome & the refractions didn't zoom out until a certain distance as they go further away from the borders so they just disappeared, & refractions on corners broke into pixels not handling antialiasing properly. This time it's using WebGL instead of backdrop-filter giving a clean near-perfect glassy effect (closer to apple's liquid glass), & it supports more browsers like Safari & Mozilla.
+- V4 : V3 is perfect, If there's gonna be a v4, it's going to be about glass on top of a glass, say apple ios app-store's navbar when you hover an item & it shows a refraction of the refraction of the background. Feel free to contribute.
+
 ## Installation
 
 ```shell
@@ -25,21 +28,13 @@ export class App {
 ```
 
 ```html
-<!-- Use in your html element as a directive, & configure it as your wish -->
-<div class="content"
-     ngxGlassyEffect
-     [blur]="1.5"
-     [scale]="50"
-     [bezel]="10"
-     [profile]="'squircle'"
-     [showBorder]="true"
-     [lensRange]="100"
-     [reflectionMidpoint]="0.2">
+<!-- Use in your html element as a directive -->
+<div class="content" ngxGlassyEffect>
   Hello - Bonjour - مرحبا
 </div>
 ```
 
-> Tip 1 **: If your div (.content for example) text is white & the background behind the div is light, give your div a semi-transparent background, like rgba(0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
+> Tip : If your div's text is white & the background behind it is light, give your div a semi-transparent background, like rgba (0, 0, 0, 0.35), to keep your text visible & readable, all without losing the glassy effect.
 
 ```css
 /* Tip 1 */
@@ -50,30 +45,35 @@ export class App {
 }
 ```
 
-> Tip 2 : If the default borders & shadows aren't working for you, you can just remove [showBorder] or make it 'false', & give the element of ngxGlassyEffect the border & shadows you like using css.
-
-```css
-/* Tip 2 */
-.content {
-  /* ... */
-  border: turquoise 2px solid;
-}
-```
-
 ## Demo
 
 > To see a visual Demo visit the git repository of this project : [Github Repository](https://github.com/anassmdi/ngx-glassy-effect)
 
 ## Configuration
 
-- If you wish to customize the inputs values, here's a full description of all the variables :
+- If you wish to customize the input values, here's a full description of all the variables :
+- NB : Avoid customizing *** inputs unless you know what you're doing.
 
-| Input              | Type                  | Default   | Description                                                                                         |
-|--------------------|-----------------------|-----------|-----------------------------------------------------------------------------------------------------|
-| bezel              | number                | 10        | The width of the refractive edge bevel in pixels.                                                   |
-| scale              | number                | 50        | The intensity of the glass refraction distortion map.                                               |
-| blur               | number                | 1.5       | The backdrop blur intensity factor applied to the substrate.                                        |
-| profile            | 'circle' / 'squircle' | 'squircle | The geometric falloff curve used to generate the edge normals.                                      |
-| showBorder         | boolean               | false     | Dynamically injects an anti-aliased pseudo-border running a dynamic light-angle alignment gradient. |
-| lensRange          | number                | 100       | The spatial scope/influence bounding box of the border lens effect.                                 |
-| reflectionMidpoint | number                | 0.2       | The turning midpoint ratio where edge glare achieves peak reflection values.                        |
+| Input             | Type                | Default                           | Description                                                                                              |
+|-------------------|---------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------|
+| refraction        | number              | Height - 10px (if Height < 110px) | The intensity/depth of the refraction displacement map (auto-calculated from element height if omitted). |
+| blur              | number              | 0                                 | The backdrop blur intensity factor applied to the substrate beneath the lens.                            |
+| radius    ***     | number \| undefined | undefined                         | The corner radius of the glass effect (falls back to the element's computed CSS `border-radius`).        |
+| bezel     ***     | number              | 0.7                               | The relative width of the refractive edge bevel transition zone.                                         |
+| curvature ***     | number              | 4                                 | The exponential falloff curve exponent used to calculate the lens profile normals.                       |
+| ior       ***     | number              | 1.5                               | The Index of Refraction (IOR) determining the degree of light bending through the lens.                  |
+| specular  ***     | number              | 0.2                               | The intensity multiplier for the specular rim highlight and edge glow effect.                            |
+| specularWidth *** | number              | 1                                 | The crispness and width of the specular rim highlight line.                                              |
+| lightAngle ***    | number              | -120                              | The directional angle of the virtual light source in degrees for rim lighting calculations.              |
+| invert    ***     | boolean             | false                             | Inverts the lens distortion direction (switching between convex magnification and concave depth).        |
+| chroma            | number              | 0.12                              | The chromatic aberration (RGB color splitting) intensity factor across refracted channels.               |
+
+## Contribute
+
+- Contributions, bug reports, and structural feature requests are welcome! Feel free to open an issue or submit a pull request on the official GitHub repository.
+
+## Author
+
+- Anassmdi
+- GitHub: @anassmdi
+- NPM Package: ngx-glassy-effect
