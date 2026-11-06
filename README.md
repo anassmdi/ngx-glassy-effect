@@ -4,9 +4,7 @@
 [![npm](https://img.shields.io/npm/l/ngx-glassy-effect.svg)](/LICENSE)
 
 This project is an Angular directive that applies a glassy effect to your html elements.
-
-- V3 : 3rd time's the charm, the V2 was not bad, but it only worked on Chrome & the refractions didn't zoom out until a certain distance as they go further away from the borders so they just disappeared, & refractions on corners broke into pixels not handling antialiasing properly. This time it's using WebGL instead of backdrop-filter giving a clean near-perfect glassy effect (closer to apple's liquid glass), & it supports more browsers like Safari & Mozilla.
-- V4 : V3 is perfect, If there's gonna be a v4, it's going to be about glass on top of a glass, say apple ios app-store's navbar when you hover an item & it shows a refraction of the refraction of the background. Feel free to contribute.
+- Supported browsers : Chrome only 
 
 ## Installation
 
@@ -65,6 +63,7 @@ V3 demo only :
 |-------------------|---------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------|
 | refraction        | number              | Height - 10px (if Height < 110px) | The intensity/depth of the refraction displacement map (auto-calculated from element height if omitted). |
 | blur              | number              | 0                                 | The backdrop blur intensity factor applied to the substrate beneath the lens.                            |
+| chroma            | number              | 0.12                              | The chromatic aberration (RGB color splitting) intensity factor across refracted channels.               |
 | radius    ***     | number \| undefined | undefined                         | The corner radius of the glass effect (falls back to the element's computed CSS `border-radius`).        |
 | bezel     ***     | number              | 0.7                               | The relative width of the refractive edge bevel transition zone.                                         |
 | curvature ***     | number              | 4                                 | The exponential falloff curve exponent used to calculate the lens profile normals.                       |
@@ -73,7 +72,6 @@ V3 demo only :
 | specularWidth *** | number              | 1                                 | The crispness and width of the specular rim highlight line.                                              |
 | lightAngle ***    | number              | -120                              | The directional angle of the virtual light source in degrees for rim lighting calculations.              |
 | invert    ***     | boolean             | false                             | Inverts the lens distortion direction (switching between convex magnification and concave depth).        |
-| chroma            | number              | 0.12                              | The chromatic aberration (RGB color splitting) intensity factor across refracted channels.               |
 
 ## Contribute
 
